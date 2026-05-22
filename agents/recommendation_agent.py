@@ -25,7 +25,7 @@ class RecommendationAgent:
         # -----------------------------------
 
         self.model = SentenceTransformer(
-            "all-MiniLM-L6-v2"
+            "paraphrase-MiniLM-L3-v2"
         )
 
         # -----------------------------------
