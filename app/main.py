@@ -1,54 +1,77 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 import pandas as pd
+import os
 
 from agents.recommendation_agent import RecommendationAgent
 
 app = FastAPI(
     title="PersonaMind AI",
-    description="Lightweight AI Recommendation API",
-    version="1.0"
+    description="Lightweight AI Recommendation System",
+    version="1.0.0"
 )
 
-import os
+# =========================
+# LOAD DATASET SAFELY
+# =========================
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-csv_path = os.path.join(BASE_DIR, "data", "reviews.csv")
+DATA_PATH = os.path.join(BASE_DIR, "data", "reviews.csv")
 
-df = pd.read_csv(csv_path)
+print(f"Loading dataset from: {DATA_PATH}")
+
+if not os.path.exists(DATA_PATH):
+    raise FileNotFoundError(f"Dataset not found at {DATA_PATH}")
+
+df = pd.read_csv(DATA_PATH).head(5000)
+
+print("Dataset loaded successfully")
+print(df.columns)
+
+# =========================
+# LOAD AGENT
+# =========================
 
 recommendation_agent = RecommendationAgent(df)
 
+# =========================
+# REQUEST MODEL
+# =========================
 
-class RecommendationRequest(BaseModel):
+class QueryRequest(BaseModel):
     query: str
 
+# =========================
+# ROOT
+# =========================
 
 @app.get("/")
-def home():
-
+def root():
     return {
-        "message": "PersonaMind AI API Running"
+        "message": "PersonaMind AI is running"
     }
 
+# =========================
+# HEALTH CHECK
+# =========================
 
 @app.get("/health")
 def health():
-
     return {
         "status": "healthy"
     }
 
+# =========================
+# RECOMMENDATION ENDPOINT
+# =========================
 
 @app.post("/recommend")
-def recommend(request: RecommendationRequest):
+def recommend(request: QueryRequest):
 
-    results = recommendation_agent.recommend(
-        request.query
-    )
+    result = recommendation_agent.recommend(request.query)
 
     return {
         "query": request.query,
-        "recommendations": results
+        "results": result
     }
