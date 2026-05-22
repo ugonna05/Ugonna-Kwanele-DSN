@@ -10,7 +10,13 @@ app = FastAPI(
     version="1.0"
 )
 
-df = pd.read_csv("data/reviews.csv")
+import os
+
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+csv_path = os.path.join(BASE_DIR, "data", "reviews.csv")
+
+df = pd.read_csv(csv_path)
 
 recommendation_agent = RecommendationAgent(df)
 
